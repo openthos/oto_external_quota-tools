@@ -128,6 +128,7 @@ static void parse_options(int argc, char **argv)
 }
 
 static void write_console_warning(struct quota_warning *warn);
+static void write_prjquota_warning(struct quota_warning *warn);
 static void write_dbus_warning(struct DBusConnection *dhandle, struct quota_warning *warn);
 
 /* Parse netlink message and process it. */
@@ -167,6 +168,8 @@ static int quota_nl_parser(struct nl_msg *msg, void *arg)
 
 	if (!(flags & FL_NOCONSOLE) && warn.qtype != PRJQUOTA)
 		write_console_warning(&warn);
+	if (!(flags & FL_NOCONSOLE) && warn.qtype == PRJQUOTA)
+		write_prjquota_warning(&warn);
 	if (!(flags & FL_NODBUS))
 		write_dbus_warning(dhandle, &warn);
 	return 0;
@@ -344,6 +347,57 @@ skip_utmp:
 	if (write_all(fd, warnbuf, strlen(warnbuf)) < 0)
 		errstr(_("Failed to write quota message for user %llu to %s: %s\n"), (unsigned long long)warn->caused_id, dev, strerror(errno));
 	close(fd);
+}
+
+static void write_prjquota_warning(struct quota_warning *warn)
+{
+	char *level, *msg;
+
+	if (warn->warntype == QUOTA_NL_ISOFTWARN ||
+	    warn->warntype == QUOTA_NL_BSOFTWARN)
+		level = _("Warning");
+	else if (warn->warntype == QUOTA_NL_IHARDWARN ||
+		 warn->warntype == QUOTA_NL_BHARDWARN)
+		level = _("Error");
+	else
+		level = _("Info");
+	switch (warn->warntype) {
+		case QUOTA_NL_IHARDWARN:
+			msg = _("file limit reached");
+			break;
+		case QUOTA_NL_ISOFTLONGWARN:
+			msg = _("file quota exceeded too long");
+			break;
+		case QUOTA_NL_ISOFTWARN:
+			msg = _("file quota exceeded");
+			break;
+		case QUOTA_NL_BHARDWARN:
+			msg = _("block limit reached");
+			break;
+		case QUOTA_NL_BSOFTLONGWARN:
+			msg = _("block quota exceeded too long");
+			break;
+		case QUOTA_NL_BSOFTWARN:
+			msg = _("block quota exceeded");
+			break;
+		case QUOTA_NL_IHARDBELOW:
+			msg = _("got below file limit");
+			break;
+		case QUOTA_NL_ISOFTBELOW:
+			msg = _("got below file quota");
+			break;
+		case QUOTA_NL_BHARDBELOW:
+			msg = _("got below block limit");
+			break;
+		case QUOTA_NL_BSOFTBELOW:
+			msg = _("got below block quota");
+			break;
+		default:
+			msg = _("unknown quota warning");
+	}
+	//sprintf(warnbuf, "%s: %s %s %s.\r\n", level, type2name(warn->qtype), user, msg);
+	//Output to stdio
+	fprintf(stdout, "%s: Type:%s User:%llu %s.\r\n", level, type2name(warn->qtype), warn->caused_id, msg);
 }
 
 /* Send warning through DBUS */

@@ -81,6 +81,8 @@ libquota_a_SOURCES = \
 	dqblk_v1.h \
 	dqblk_v2.h \
 	dqblk_xfs.h \
+	quotactl.c \
+	quota.h \
 	quotaio.c \
 	quotaio.h \
 	quotaio_v1.c \
@@ -101,6 +103,7 @@ libquota_a_SOURCES = \
 	common.h \
 	quotasys.c \
 	quotasys.h \
+	mntent_r.c \
 	mntopt.h \
 	pot.c \
 	pot.h
@@ -159,6 +162,7 @@ quotacheck_LDADD = \
 
 quota_SOURCES = \
 	quota.c \
+	quotactl.c \
 	quota.h \
 	quotaops.c \
 	quotaops.h
@@ -196,6 +200,8 @@ warnquota_LDADD = \
 
 quotastats_SOURCES = \
 	quotastats.c \
+	quotactl.c \
+	quota.h \
 	common.c \
 	common.h \
 	pot.c \

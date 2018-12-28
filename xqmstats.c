@@ -10,6 +10,7 @@
 #include <string.h>
 #include "common.h"
 #include "pot.h"
+#include "quota.h"
 
 #define XQMFILE		"/proc/fs/xfs/xqm"
 #define STATFILE	"/proc/fs/xfs/stat"

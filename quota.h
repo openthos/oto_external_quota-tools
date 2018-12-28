@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdio.h>
 
 typedef u_int32_t qid_t;	/* Type in which we store ids in memory */
 typedef int64_t qsize_t;	/* Type in which we store size limitations */
@@ -181,6 +182,15 @@ enum {
 	#endif
 #endif
 
-long quotactl __P((int, const char *, qid_t, caddr_t));
+extern int quotactl(int __cmd, const char *__special, int __id, caddr_t __addr);
+
+extern char* basename(const char* s);
+
+extern FILE *setmntent (const char *file, const char *mode);
+extern int endmntent (FILE *stream);
+extern struct mntent *getmntent_r (FILE *stream, struct mntent *mp, char *buffer, int bufsiz);
+extern struct mntent *getmntent (FILE *stream);
+extern int addmntent (FILE *stream, const struct mntent *mnt);
+extern char *hasmntopt (const struct mntent *mnt, const char *opt);
 
 #endif /* _QUOTA_ */

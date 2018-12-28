@@ -1270,6 +1270,7 @@ alloc:
 	autofsdir = smalloc(sizeof(char *) * ALLOC_ENTRIES_NUM);
 	autofsdircnt = 0;
 	autofsdir_allocated = ALLOC_ENTRIES_NUM;
+	//getmntent() in bionic always return NULL, fixed by xiaoluoyuan@163.com
 	while ((mnt = getmntent(mntf))) {
 		const char *devname;
 		char *opt;

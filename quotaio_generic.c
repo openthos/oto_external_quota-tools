@@ -116,6 +116,62 @@ static int scan_one_dquot(struct dquot *dquot, int (*get_dquot)(struct dquot *))
 	return 0;
 }
 
+static struct passwd entries_pw[] = {
+	{ .pw_name = (char *) "root", .pw_passwd = (char *) "x",
+		.pw_uid = 0, .pw_gid = 0, .pw_dir = (char *) "/",
+		.pw_shell = (char *) "/bin/sh" },
+	{ .pw_name = (char *) "openthos", .pw_passwd = (char *) "x",
+		.pw_uid = 31415, .pw_gid = 31415, .pw_dir = (char *) "/data/data/home/openthos",
+		.pw_shell = (char *) "/bin/sh" },
+	{ .pw_name = NULL, .pw_passwd = NULL, .pw_uid = 0, .pw_gid = 0,
+		.pw_dir = NULL, .pw_shell = NULL },
+};
+static struct passwd *current_pw;
+struct passwd *getpwent(void)
+{
+	if (current_pw == NULL)
+		current_pw = entries_pw;
+	if (current_pw->pw_name == NULL) {
+		return NULL;
+	}
+	return current_pw++;
+}
+int setpwent(void)
+{
+	current_pw = NULL;
+}
+
+void endpwent(void)
+{
+	current_pw = NULL;
+}
+
+static struct group entries_grp[] = {
+	{ .gr_name = (char *) "root", .gr_passwd = (char *) "x",
+		.gr_gid = 0, .gr_mem = NULL },
+	{ .gr_name = (char *) "openthos", .gr_passwd = (char *) "x",
+		.gr_gid = 31415, .gr_mem = NULL },
+	{ .gr_name = NULL, .gr_passwd = NULL, .gr_gid = 0, .gr_mem = NULL },
+};
+static struct group *current_grp;
+struct group *getgrent(void)
+{
+	if (current_grp == NULL)
+		current_grp = entries_grp;
+	if (current_grp->gr_name == NULL) {
+		return NULL;
+	}
+	return current_grp++;
+}
+void setgrent(void)
+{
+	current_grp = NULL;
+}
+void endgrent(void)
+{
+	current_grp = NULL;
+}
+
 /* Generic quota scanning using passwd... */
 int generic_scan_dquots(struct quota_handle *h,
 			int (*process_dquot)(struct dquot *dquot, char *dqname),

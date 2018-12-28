@@ -246,6 +246,7 @@ int main(int argc, char **argv)
 	char *tmpfil, *tmpdir = NULL;
 	struct stat st;
 	struct timespec mtime;
+	struct timespec mtime_st;
 
 	gettexton();
 	progname = basename(argv[0]);
@@ -296,7 +297,10 @@ int main(int argc, char **argv)
 			ret = -1;
 			goto out;
 		}
-		mtime = st.st_mtim;
+		mtime_st.tv_sec = st.st_mtime;
+		mtime_st.tv_nsec = st.st_mtime_nsec;
+		mtime = mtime_st;
+
 		if (editprivs(tmpfil) < 0) {
 			errstr(_("Error while editing grace times.\n"));
 			ret = -1;
@@ -315,8 +319,10 @@ int main(int argc, char **argv)
 			ret = -1;
 			goto out;
 		}
+		mtime_st.tv_sec = st.st_mtime;
+		mtime_st.tv_nsec = st.st_mtime_nsec;
 		/* File not modified? */
-		if (timespec_cmp(&mtime, &st.st_mtim) == 0)
+		if (timespec_cmp(&mtime, &mtime_st) == 0)
 			goto out;
 		if (readtimes(handles, tmpfd) < 0) {
 			errstr(_("Failed to parse grace times file.\n"));
@@ -348,7 +354,9 @@ int main(int argc, char **argv)
 				ret = -1;
 				goto out;
 			}
-			mtime = st.st_mtim;
+			mtime_st.tv_sec = st.st_mtime;
+			mtime_st.tv_nsec = st.st_mtime_nsec;
+			mtime = mtime_st;
 			if (editprivs(tmpfil) < 0) {
 				errstr(_("Error while editing quotas.\n"));
 				ret = -1;
@@ -367,8 +375,10 @@ int main(int argc, char **argv)
 				ret = -1;
 				goto next_user;
 			}
+			mtime_st.tv_sec = st.st_mtime;
+			mtime_st.tv_nsec = st.st_mtime_nsec;
 			/* File not modified? */
-			if (timespec_cmp(&mtime, &st.st_mtim) == 0)
+			if (timespec_cmp(&mtime, &mtime_st) == 0)
 				goto next_user;
 			if (flags & FL_EDIT_TIMES) {
 				if (readindividualtimes(curprivs, tmpfd) < 0) {
